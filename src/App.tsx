@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import type { GameState, PuzzleState, Question, RewardType, Team } from './types'
 import { initializeQuestions, saveQuestions } from './questions'
+import { Sounds, ensureAudioUnlocked } from './sound'
 
 const PUZZLE_ROWS = 2
 const PUZZLE_COLS = 5
@@ -90,6 +91,8 @@ function App() {
   }
 
   function handleLetterClick(id: number) {
+    ensureAudioUnlocked()
+    Sounds.letterClick()
     const q = state.questions.find((x) => x.id === id)
     if (!q || q.used) return
     setShowQuestionId(id)
@@ -126,6 +129,7 @@ function App() {
 
   function onRevealTile(idx: number) {
     if (state.puzzle.revealed[idx]) return
+    Sounds.tileOpen()
     setQuestionsAndState((prev) => ({
       ...prev,
       puzzle: { ...prev.puzzle, revealed: prev.puzzle.revealed.map((r, i) => (i === idx ? true : r)) },
@@ -275,11 +279,20 @@ function App() {
 function QuestionModal({ q, onClose, onAnswer }: { q: Question; onClose: () => void; onAnswer: (correct: boolean) => void }) {
   const [selected, setSelected] = useState<string | null>(null)
   const [showResult, setShowResult] = useState(false)
+  useEffect(() => {
+    ensureAudioUnlocked()
+    Sounds.questionOpen()
+  }, [])
   function onPick(label: string) {
     if (selected) return
     setSelected(label)
     setShowResult(true)
     const isCorrect = label === q.correctLabel
+    if (isCorrect) {
+      Sounds.correct()
+    } else {
+      Sounds.wrong()
+    }
     window.setTimeout(() => {
       onAnswer(isCorrect)
     }, 3000)
