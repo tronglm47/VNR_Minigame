@@ -2,14 +2,15 @@ let audioCtx: AudioContext | null = null
 
 function getAudio(): AudioContext {
   if (typeof window === 'undefined') throw new Error('No window')
-  if (!audioCtx) {
+  if (audioCtx == null) {
     const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext
     audioCtx = new Ctx()
   }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(() => {})
+  const ctx = audioCtx as AudioContext
+  if (ctx.state === 'suspended') {
+    ctx.resume().catch(() => {})
   }
-  return audioCtx
+  return ctx
 }
 
 type Wave = OscillatorType
